@@ -128,5 +128,37 @@ module OpenSSL::PKey
 
   class RSA
     include OpenSSL::Marshal
+
+    class << self
+      # :call-seq:
+      #    RSA.generate(size)           => RSA instance
+      #    RSA.generate(size, exponent) => RSA instance
+      #
+      # Generates an \RSA keypair.
+      #
+      # See also OpenSSL::PKey.generate_key.
+      #
+      # size::
+      #   An Integer representing the desired key size.  Keys smaller than 1024
+      #   should be considered insecure.
+      # exponent::
+      #   An odd Integer, normally 3, 17, or 65537.
+      def generate(size, exp = 0x10001, &blk)
+        OpenSSL::PKey.generate_key("RSA", {
+          "rsa_keygen_bits" => size,
+          "rsa_keygen_pubexp" => exp,
+        }, &blk)
+      end
+
+      # Handle RSA.new(size, exponent) form here; new(str) and new() forms
+      # are handled by #initialize
+      def new(*args, &blk) # :nodoc:
+        if args[0].is_a?(Integer)
+          generate(*args, &blk)
+        else
+          super
+        end
+      end
+    end
   end
 end
