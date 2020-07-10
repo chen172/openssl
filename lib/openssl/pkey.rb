@@ -31,6 +31,60 @@ module OpenSSL::PKey
 
   class DSA
     include OpenSSL::Marshal
+
+    # :call-seq:
+    #    dsa.syssign(string) -> string
+    #
+    # Computes and returns the DSA signature of _string_, where _string_ is
+    # expected to be an already-computed message digest of the original input
+    # data. The signature is issued using the private key of this DSA instance.
+    #
+    # Deprecated in version 3.0. Consider using OpenSSL::PKey::PKey#sign_raw
+    # and OpenSSL::PKey::PKey#verify_raw instead.
+    #
+    # string::
+    #   A message digest of the original input data to be signed.
+    #
+    # Example:
+    #   dsa = OpenSSL::PKey::DSA.new(2048)
+    #   doc = "Sign me"
+    #   digest = OpenSSL::Digest.digest('SHA1', doc)
+    #
+    #   # With legacy #syssign and #sysverify:
+    #   sig = dsa.syssign(digest)
+    #   p dsa.sysverify(digest, sig) #=> true
+    #
+    #   # With #sign_raw and #verify_raw:
+    #   sig = dsa.sign_raw(nil, digest)
+    #   p dsa.verify_raw(nil, sig, digest) #=> true
+    def syssign(string)
+      q or raise OpenSSL::PKey::DSAError, "incomplete DSA"
+      private? or raise OpenSSL::PKey::DSAError, "Private DSA key needed!"
+      begin
+        sign_raw(nil, string)
+      rescue OpenSSL::PKey::PKeyError
+        raise OpenSSL::PKey::DSAError, $!.message
+      end
+    end
+
+    # :call-seq:
+    #    dsa.sysverify(digest, sig) -> true | false
+    #
+    # Verifies whether the signature is valid given the message digest input.
+    # It does so by validating _sig_ using the public key of this DSA instance.
+    #
+    # Deprecated in version 3.0. Consider using OpenSSL::PKey::PKey#sign_raw
+    # and OpenSSL::PKey::PKey#verify_raw instead.
+    #
+    # digest::
+    #   A message digest of the original input data to be signed.
+    # sig::
+    #   A DSA signature value.
+    def sysverify(digest, sig)
+      verify_raw(nil, sig, digest)
+    rescue OpenSSL::PKey::PKeyError
+      raise OpenSSL::PKey::DSAError, $!.message
+    end
   end
 
   if defined?(EC)
