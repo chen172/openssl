@@ -44,6 +44,7 @@ module OpenSSL
       # Returns the authentication code as a hex-encoded string. The _digest_
       # parameter specifies the digest algorithm to use. This may be a String
       # representing the algorithm name or an instance of OpenSSL::Digest.
+      # 以hex的格式返回认证码，_digest_参数确定了使用的hash算法。
       #
       # === Example
       #  key = 'key'
